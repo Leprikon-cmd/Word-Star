@@ -12,6 +12,10 @@ final class GameLogic {
     // 🔠 Текущий набор букв для уровня
     private(set) var currentLetters: [Character] = []
     
+    func getLetters() -> [Character] {
+        return currentLetters
+    }
+    
     // ✅ Допустимые слова для текущего уровня
     private(set) var validWords: Set<String> = []
 

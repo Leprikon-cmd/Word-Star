@@ -13,11 +13,16 @@ struct DictionaryItem: Codable {
     let author: String
 }
 
-// 📚 Менеджер словаря
-final class DictionaryManager {
+// 📘 Менеджер словаря — Singleton + ObservableObject
+class DictionaryManager: ObservableObject {
+    static let shared = DictionaryManager() // 🔂 глобальный доступ
+
+    private init() {
+        loadWords()
+    }
 
     // 🔤 Все слова — множество слов в нижнем регистре
-    private(set) var allWords: Set<String> = []
+    private var allWords: Set<String> = []
 
     // 🧠 Полный словарь: слово → DictionaryItem (определение + автор)
     private var fullDictionary: [String: DictionaryItem] = [:]
@@ -47,7 +52,6 @@ final class DictionaryManager {
             }
 
             print("✅ Слов загружено: \(allWords.count)")
-
         } catch {
             print("💥 Ошибка загрузки словаря: \(error.localizedDescription)")
         }
