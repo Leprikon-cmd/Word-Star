@@ -50,11 +50,16 @@ struct GameBoardView: View {
                     let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
                     let radius = starRadius
 
-                    // 🔄 Обновим точки
+                    // 🔄 Обновим точки при изменении букв
                     Color.clear
                         .onAppear {
                             boxSize = geo.size
-                            starPoints = computeStarPoints(from: viewModel.gameLogic.getLetters(), center: center, radius: radius)
+                            starPoints = computeStarPoints(from: viewModel.letters, center: center, radius: radius)
+                        }
+                        .onChange(of: viewModel.letters) { newLetters in
+                            boxSize = geo.size
+                            starPoints = computeStarPoints(from: newLetters, center: center, radius: radius)
+                            starPoints = computeStarPoints(from: newLetters, center: center, radius: radius)
                         }
 
                     // 🟡 Линии свайпа

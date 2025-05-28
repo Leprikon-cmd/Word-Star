@@ -12,6 +12,9 @@ final class GameViewModel: ObservableObject {
 
     // 🎨 Текущий фон
     @Published var backgroundImage: String = "Background1.jpg"
+    
+    // текущий набор букв
+    @Published var letters: [Character] = []
 
     // 🔤 Текущий ввод (посимвольно)
     @Published var selectedLetters: [Character] = []
@@ -50,10 +53,20 @@ final class GameViewModel: ObservableObject {
         self.letterSetGenerator = generator
         self.gameLogic = gameLogic
 
-        // 🎮 Генерация первого уровня
-        gameLogic.generateNewLevel(from: generator)
-        updateWords()
+        startNewGame() // 🚀 Только один вызов, и всё красиво
+    }
+    
+    func startNewGame() {
+        gameLogic.generateNewLevel(from: letterSetGenerator)     // 🎮 Сначала генерим уровень
+        letters = gameLogic.getLetters()                          // ✍️ Сохраняем буквы для отрисовки
+        validWords = gameLogic.getValidWords().sorted(by: {      // 📜 Получаем все слова
+            $0.count == $1.count ? $0 < $1 : $0.count > $1.count
+        })
+        foundWords = []
+        score = 0
+        result = ""
         pickNewBackground()
+        showWinDialog = false
     }
 
     // 🎨 Случайный фон
@@ -69,6 +82,7 @@ final class GameViewModel: ObservableObject {
         result = ""
         selectedLetters.removeAll()
         gameLogic.generateNewLevel(from: letterSetGenerator)
+        letters = gameLogic.getLetters() // ✅ обновим published-свойство
         updateWords()
         pickNewBackground()
     }
