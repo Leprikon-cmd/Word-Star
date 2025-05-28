@@ -9,6 +9,9 @@ import SwiftUI
 
 struct StatsView: View {
     var body: some View {
+        BackgroundManager()   // 🌄 Фон
+            .ignoresSafeArea()
+        
         Text("Статистика — пока пусто")
     }
 }

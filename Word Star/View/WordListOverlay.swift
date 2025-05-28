@@ -47,24 +47,27 @@ struct WordListOverlay: View {
                             }
 
                             ScrollView {
-                                let columns = [GridItem(.adaptive(minimum: 80), spacing: 12)]
-                                LazyVGrid(columns: columns, spacing: 20) {
-                                    ForEach(viewModel.validWords.sorted(by: wordSort), id: \.self) { word in
-                                        let isFound = viewModel.foundWords.contains(word)
-                                        let display = isFound ? word : String(repeating: "✨", count: word.count)
+                                VStack(alignment: .leading, spacing: 12) {
+                                    ForEach(groupedWords(), id: \.self) { row in
+                                        HStack(spacing: 12) {
+                                            ForEach(row, id: \.self) { word in
+                                                let isFound = viewModel.foundWords.contains(word)
+                                                let display = isFound ? word : String(repeating: "🔲", count: word.count)
 
-                                        Text(display)
-                                            .font(.system(size: 18))
-                                            .foregroundColor(.black) // 👈 Явно
-                                            .onTapGesture {
-                                                if isFound {
-                                                    selectedWord = word
-                                                }
+                                                Text(display)
+                                                    .font(.system(size: 24))
+                                                    .foregroundColor(.black)
+                                                    .onTapGesture {
+                                                        if isFound {
+                                                            selectedWord = word
+                                                        }
+                                                    }
+                                                    .frame(minWidth:60)
                                             }
-                                            .frame(minWidth: 60)
+                                        }
                                     }
                                 }
-                                .padding()
+                                .padding(.bottom, 100) // 👈 Вот сюда — увеличь при необходимости
                             }
                         }
                         .padding()
@@ -85,6 +88,35 @@ struct WordListOverlay: View {
             return lhs.count > rhs.count
         }
         return lhs < rhs
+    }
+    
+    private func groupedWords() -> [[String]] {
+        let sorted = viewModel.validWords.sorted(by: wordSort)
+        var rows: [[String]] = []
+        var currentRow: [String] = []
+
+        for word in sorted {
+            let length = word.count
+
+            let maxInRow: Int = {
+                if length >= 6 { return 1 }
+                else if length >= 4 { return 2 }
+                else { return 3 }
+            }()
+
+            currentRow.append(word)
+
+            if currentRow.count == maxInRow {
+                rows.append(currentRow)
+                currentRow = []
+            }
+        }
+
+        if !currentRow.isEmpty {
+            rows.append(currentRow)
+        }
+
+        return rows
     }
 
     // 📥 Загрузка фонового изображения из ассетов

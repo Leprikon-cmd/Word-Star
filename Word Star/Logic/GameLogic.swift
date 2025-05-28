@@ -9,6 +9,9 @@ import Foundation
 // GameLogic — логика игры (одиночка), как в Android-версии
 final class GameLogic {
     
+    private var letters: [Character] = []
+    private var foundWords: Set<String> = []
+    
     // 🔠 Текущий набор букв для уровня
     private(set) var currentLetters: [Character] = []
     
@@ -57,5 +60,9 @@ final class GameLogic {
     // 📤 Получить все допустимые слова
     func getValidWords() -> [String] {
         return Array(validWords)
+    }
+    func loadState(letters: [Character], foundWords: Set<String>) {
+        self.letters = letters
+        self.foundWords = foundWords
     }
 }

@@ -7,18 +7,44 @@
 import SwiftUI
 
 struct GameScreenView: View {
-    @StateObject private var viewModel = GameViewModel(
-        dictionaryManager: DictionaryManager.shared,
-        generator: LetterSetGenerator(dictionary: DictionaryManager.shared),
-        gameLogic: GameLogic()
-    )
-
+    let forceNewGame: Bool // 👈 добавили флаг
+    // 🎮 ViewModel теперь инициализируется с флагом `forceNewGame`
+    @StateObject private var viewModel: GameViewModel
+    
     @State private var showWordList = false     // 📜 Оверлей со списком слов
+    
+    // 🧠 Новый init с параметром, определяющим, грузим ли прогресс
+    init(forceNewGame: Bool) {
+        _viewModel = StateObject(wrappedValue: {
+            let logic = GameLogic()
+            let dictionary = DictionaryManager.shared
+            let generator = LetterSetGenerator(dictionary: dictionary)
+            let vm = GameViewModel(dictionaryManager: dictionary, generator: generator, gameLogic: logic)
+            
+            if !forceNewGame, let saved = GameProgressManager.shared.loadProgress() {
+                print("📦 Загружаем сохранёнку")
+                logic.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
+                vm.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
+                vm.score = saved.score
+                vm.level = saved.level
+                vm.updateWords()
+            } else {
+                print("🆕 Новая игра")
+                vm.startNewGame()
+                GameProgressManager.shared.clearProgress()
+            }
+
+            return vm
+        }())
+        
+        self.forceNewGame = forceNewGame
+    }
+
 
     var body: some View {
         ZStack {
-          
-            BackgroundManager()   // 🌄 Фон
+            // 🌄 Фон
+            BackgroundManager()
                 .ignoresSafeArea()
 
             // 🎉 Победный алерт
@@ -70,12 +96,12 @@ struct GameScreenView: View {
                         Text("Найдено: \(viewModel.getFoundWordCount()) из \(viewModel.getTotalValidWordCount())")
                             .padding(6)
                             .background(Color.white.opacity(0.4))
-                            .foregroundColor(.black) // 👈 Явно
+                            .foregroundColor(.black)
                             .clipShape(Capsule())
                         Text("Очки: \(viewModel.score)")
                             .padding(6)
                             .background(Color.white.opacity(0.4))
-                            .foregroundColor(.black) // 👈 Явно
+                            .foregroundColor(.black)
                             .clipShape(Capsule())
                     }
 
@@ -84,7 +110,7 @@ struct GameScreenView: View {
                     // 🔄 Кнопка перезапуска
                     Button(action: {
                         viewModel.resetGame()
-                        BackgroundManagerController.shared.reload() // 💥 меняем фон!
+                        BackgroundManagerController.shared.reload()
                     }) {
                         Text("🔄")
                             .padding()

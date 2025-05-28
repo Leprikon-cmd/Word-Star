@@ -8,9 +8,11 @@ import Foundation
 import SwiftUI
 
 // 🎮 Основная модель представления для игры
-final class GameViewModel: ObservableObject {
+// 🧠 ViewModel для игры
+class GameViewModel: ObservableObject {
 
     @Published var letters: [Character] = []         // текущий набор букв
+    @Published var level: Int = 1
     @Published var selectedLetters: [Character] = [] // 🔤 Текущий ввод (посимвольно)
     @Published var result: String = ""               // ✅ Результат последней проверки (строка)
     @Published var validWords: [String] = []         // 📋 Все допустимые слова для уровня
@@ -24,14 +26,30 @@ final class GameViewModel: ObservableObject {
     // 📦 Генератор и словарь (инициализируются при создании)
     private let dictionaryManager: DictionaryManager
     private let letterSetGenerator: LetterSetGenerator
+    private let progressManager = GameProgressManager.shared // 🎒 менеджер сохранения
+    
     let gameLogic: GameLogic
 
-    init(dictionaryManager: DictionaryManager, generator: LetterSetGenerator, gameLogic: GameLogic) {
+    init(dictionaryManager: DictionaryManager, generator: LetterSetGenerator, gameLogic: GameLogic, forceNewGame: Bool = false) {
         self.dictionaryManager = dictionaryManager
         self.letterSetGenerator = generator
         self.gameLogic = gameLogic
 
-        startNewGame() // 🚀 Только один вызов, и всё красиво
+        if forceNewGame {
+            print("🧼 Принудительно новая игра")
+            startNewGame()
+        } else if let saved = progressManager.loadProgress() {
+            print("📦 Загружаем сохранённую игру")
+            self.letters = saved.letters
+            self.foundWords = saved.foundWords
+            self.score = saved.score
+            self.level = saved.level
+            gameLogic.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
+            updateWords()
+        } else {
+            print("🆕 Прогресса нет — старт новой игры")
+            startNewGame()
+        }
     }
     
     func startNewGame() {
@@ -45,17 +63,49 @@ final class GameViewModel: ObservableObject {
         result = ""
         showWinDialog = false
     }
+    
+    func loadState(letters: [Character], foundWords: Set<String>) {
+        self.letters = letters
+        self.foundWords = Array(foundWords)
+    }
 
 
-    // 🔁 Сброс уровня
+    // 🔁 Сброс уровня и попытка загрузить прогресс
     func resetGame() {
+        // 🧹 Чистим всё, что связано с вводом
+        selectedLetters.removeAll()
         foundWords.removeAll()
         score = 0
         result = ""
-        selectedLetters.removeAll()
-        gameLogic.generateNewLevel(from: letterSetGenerator)
-        letters = gameLogic.getLetters() // ✅ обновим published-свойство
-        updateWords()
+        showWinDialog = false
+
+        // 📦 Пробуем загрузить прогресс
+        if let savedProgress = progressManager.loadProgress() {
+            print("📦 Прогресс найден — загружаем")
+
+            // ✅ Преобразуем [String] → [Character]
+            let restoredLetters: [Character] = savedProgress.letters.flatMap { $0 }
+
+            // ✅ Преобразуем [String] → Set<String>
+            let restoredFoundWords = Set(savedProgress.foundWords)
+
+            gameLogic.loadState(
+                letters: restoredLetters,
+                foundWords: restoredFoundWords
+            )
+
+            letters = restoredLetters
+            foundWords = Array(restoredFoundWords)
+            score = savedProgress.score
+
+            updateWords()
+        } else {
+            print("🆕 Прогресс не найден — генерим новый уровень")
+
+            gameLogic.generateNewLevel(from: letterSetGenerator)
+            letters = gameLogic.getLetters()
+            updateWords()
+        }
     }
 
     // ✅ Проверка введённого слова
@@ -72,6 +122,12 @@ final class GameViewModel: ObservableObject {
             addScore(for: word.count)
             result = "✅ \(word)"
             lastResultSymbol = "✅"
+            progressManager.saveProgress(
+                letters: letters,
+                foundWords: foundWords,
+                score: score,
+                level: level
+            )
 
             if foundWords.count == gameLogic.getValidWords().count {
                 showWinDialog = true

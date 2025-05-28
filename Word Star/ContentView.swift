@@ -10,7 +10,7 @@ import SwiftUI
 // 📍 Навигационные маршруты
 enum Screen: Hashable {
     case start
-    case game
+    case game(forceNewGame: Bool)
     case settings
     case stats
 }
@@ -28,8 +28,8 @@ struct ContentView: View {
                 switch screen {
                 case .start:
                     StartView { destination in path.append(destination) }
-                case .game:
-                    GameScreenView()
+                case .game(let forceNewGame):
+                        GameScreenView(forceNewGame: forceNewGame)
                 case .settings:
                     SettingsView()
                 case .stats:

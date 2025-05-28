@@ -7,6 +7,9 @@
 import SwiftUI
 
 struct StartView: View {
+    
+    @State private var hasSavedGame = GameProgressManager.shared.loadProgress() != nil
+    
     var onNavigate: (Screen) -> Void
     
     var body: some View {
@@ -23,9 +26,23 @@ struct StartView: View {
                     .padding(.bottom, 20)
                 
                 VStack(spacing: 16) {
-                    // 🔘 Кнопка Играть
+                    // 🔄 Кнопка "Продолжить игру", если есть сохранение
+                    if hasSavedGame {
+                        Button(action: {
+                            onNavigate(.game(forceNewGame: false))
+                        }) {
+                            Text("Продолжить")
+                                .font(.title2)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green.opacity(0.8))
+                                .cornerRadius(12)
+                        }
+                    }
+
+                    // 🆕 Кнопка "Играть сначала" (без сохранённого прогресса)
                     Button(action: {
-                        onNavigate(.game)
+                        onNavigate(.game(forceNewGame: true))
                     }) {
                         Text("Играть")
                             .font(.title2)

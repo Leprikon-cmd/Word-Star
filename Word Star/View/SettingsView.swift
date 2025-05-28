@@ -8,6 +8,8 @@ import SwiftUI
 
 struct SettingsView: View {
     var body: some View {
+        BackgroundManager()   // 🌄 Фон
+            .ignoresSafeArea()
         Text("Настройки — пока пусто")
     }
 }
