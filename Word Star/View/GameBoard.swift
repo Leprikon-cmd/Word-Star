@@ -35,11 +35,13 @@ struct GameBoardView: View {
                 .padding(.horizontal, 24)
                 .padding(.vertical, 8)
                 .background(Color.white.opacity(0.6))
+                .foregroundColor(.black) // 👈 Явно
                 .clipShape(Capsule())
 
             // 📣 Результат
             Text(viewModel.result)
                 .font(.system(size: 18))
+                .foregroundColor(.black) // 👈 Явно
                 .foregroundColor(.gray)
                 .padding(.bottom, 20)
 
@@ -82,6 +84,7 @@ struct GameBoardView: View {
                             .font(.system(size: letterFontSize))
                             .frame(width: letterCircleSize, height: letterCircleSize)
                             .background(isSelected ? Color.yellow.opacity(0.7) : Color.white.opacity(0.6))
+                            .foregroundColor(.black) // 👈 Явно
                             .clipShape(Circle())
                             .position(point)
                     }

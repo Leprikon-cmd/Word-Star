@@ -55,6 +55,7 @@ struct WordListOverlay: View {
 
                                         Text(display)
                                             .font(.system(size: 18))
+                                            .foregroundColor(.black) // 👈 Явно
                                             .onTapGesture {
                                                 if isFound {
                                                     selectedWord = word

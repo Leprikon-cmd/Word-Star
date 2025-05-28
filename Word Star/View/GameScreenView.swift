@@ -70,10 +70,12 @@ struct GameScreenView: View {
                         Text("Найдено: \(viewModel.getFoundWordCount()) из \(viewModel.getTotalValidWordCount())")
                             .padding(6)
                             .background(Color.white.opacity(0.4))
+                            .foregroundColor(.black) // 👈 Явно
                             .clipShape(Capsule())
                         Text("Очки: \(viewModel.score)")
                             .padding(6)
                             .background(Color.white.opacity(0.4))
+                            .foregroundColor(.black) // 👈 Явно
                             .clipShape(Capsule())
                     }
 

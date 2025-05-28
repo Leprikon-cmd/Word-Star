@@ -34,11 +34,13 @@ struct DefinitionOverlay: View {
                     Text(word.uppercased())
                         .font(.title)
                         .bold()
+                        .foregroundColor(.black)
 
                     // 📖 Определение
                     ScrollView {
                         Text(DictionaryManager.shared.getDefinition(for: word))
                             .font(.body)
+                            .foregroundColor(.black) // 👈 добавляем явно
                     }
                 }
                 .padding(20)
