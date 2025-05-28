@@ -10,38 +10,16 @@ import SwiftUI
 // 🎮 Основная модель представления для игры
 final class GameViewModel: ObservableObject {
 
-    // 🎨 Текущий фон
-    @Published var backgroundImage: String = "Background1.jpg"
-    
-    // текущий набор букв
-    @Published var letters: [Character] = []
-
-    // 🔤 Текущий ввод (посимвольно)
-    @Published var selectedLetters: [Character] = []
-
-    // ✅ Результат последней проверки (строка)
-    @Published var result: String = ""
-
-    // 📋 Все допустимые слова для уровня
-    @Published var validWords: [String] = []
-
-    // 🧠 Найденные игроком слова
-    @Published var foundWords: [String] = []
-
-    // 🧮 Текущий счёт
-    @Published var score: Int = 0
-
-    // 🏆 Флаг победы
-    @Published var showWinDialog: Bool = false
-
-    // ✅❌ Символ результата (галка/крестик)
-    @Published var lastResultSymbol: String? = nil
-
-    // 🔲 Оверлей — пока не используется
-    @Published var showOverlay: Bool = false
-
-    // 🔐 Защита от повторного тапа по той же букве подряд (если понадобится)
-    private var lastAddedChar: Character? = nil
+    @Published var letters: [Character] = []         // текущий набор букв
+    @Published var selectedLetters: [Character] = [] // 🔤 Текущий ввод (посимвольно)
+    @Published var result: String = ""               // ✅ Результат последней проверки (строка)
+    @Published var validWords: [String] = []         // 📋 Все допустимые слова для уровня
+    @Published var foundWords: [String] = []         // 🧠 Найденные игроком слова
+    @Published var score: Int = 0                    // 🧮 Текущий счёт
+    @Published var showWinDialog: Bool = false       // 🏆 Флаг победы
+    @Published var lastResultSymbol: String? = nil   // ✅❌ Символ результата (галка/крестик)
+    @Published var showOverlay: Bool = false         // 🔲 Оверлей — пока не используется
+    private var lastAddedChar: Character? = nil      // 🔐 Защита от повторного тапа по той же букве подряд (если понадобится)
 
     // 📦 Генератор и словарь (инициализируются при создании)
     private let dictionaryManager: DictionaryManager
@@ -65,15 +43,9 @@ final class GameViewModel: ObservableObject {
         foundWords = []
         score = 0
         result = ""
-        pickNewBackground()
         showWinDialog = false
     }
 
-    // 🎨 Случайный фон
-    func pickNewBackground() {
-        let index = Int.random(in: 1...62)
-        backgroundImage = "Background\(index)"
-    }
 
     // 🔁 Сброс уровня
     func resetGame() {
@@ -84,7 +56,6 @@ final class GameViewModel: ObservableObject {
         gameLogic.generateNewLevel(from: letterSetGenerator)
         letters = gameLogic.getLetters() // ✅ обновим published-свойство
         updateWords()
-        pickNewBackground()
     }
 
     // ✅ Проверка введённого слова

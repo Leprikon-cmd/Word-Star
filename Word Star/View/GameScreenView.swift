@@ -14,14 +14,11 @@ struct GameScreenView: View {
     )
 
     @State private var showWordList = false     // 📜 Оверлей со списком слов
-    @State private var backgroundImage: Image? = nil
 
     var body: some View {
         ZStack {
-            // 🌄 Фон
-            backgroundImage?
-                .resizable()
-                .scaledToFill()
+          
+            BackgroundManager()   // 🌄 Фон
                 .ignoresSafeArea()
 
             // 🎉 Победный алерт
@@ -85,6 +82,7 @@ struct GameScreenView: View {
                     // 🔄 Кнопка перезапуска
                     Button(action: {
                         viewModel.resetGame()
+                        BackgroundManagerController.shared.reload() // 💥 меняем фон!
                     }) {
                         Text("🔄")
                             .padding()
@@ -108,16 +106,5 @@ struct GameScreenView: View {
                 }
             }
         }
-        .onAppear {
-            loadBackground()
-        }
-        .onChange(of: viewModel.backgroundImage) { _ in
-            loadBackground()
-        }
-    }
-
-    // 🎨 Загрузка фонового изображения из Assets
-    private func loadBackground() {
-        backgroundImage = Image(viewModel.backgroundImage)
     }
 }
