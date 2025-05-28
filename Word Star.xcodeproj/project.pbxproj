@@ -29,9 +29,30 @@
 		2718CC272DE73A5A001B14B8 /* Word StarUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Word StarUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2718CC5C2DE73FDF001B14B8 /* Exceptions for "Word Star" folder in "Word StarTests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				dictionary.json,
+			);
+			target = 2718CC1C2DE73A5A001B14B8 /* Word StarTests */;
+		};
+		2718CC5D2DE73FDF001B14B8 /* Exceptions for "Word Star" folder in "Word StarUITests" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				dictionary.json,
+			);
+			target = 2718CC262DE73A5A001B14B8 /* Word StarUITests */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		2718CC122DE73A57001B14B8 /* Word Star */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2718CC5C2DE73FDF001B14B8 /* Exceptions for "Word Star" folder in "Word StarTests" target */,
+				2718CC5D2DE73FDF001B14B8 /* Exceptions for "Word Star" folder in "Word StarUITests" target */,
+			);
 			path = "Word Star";
 			sourceTree = "<group>";
 		};

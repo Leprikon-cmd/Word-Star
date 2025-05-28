@@ -7,18 +7,35 @@
 
 import SwiftUI
 
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
-        }
-        .padding()
-    }
+// 📍 Навигационные маршруты
+enum Screen: Hashable {
+    case start
+    case game
+    case settings
+    case stats
 }
 
-#Preview {
-    ContentView()
+struct ContentView: View {
+    // 🧭 Управление стеком экранов
+    @State private var path: [Screen] = []
+
+    var body: some View {
+        NavigationStack(path: $path) {
+            StartView { destination in
+                path.append(destination)
+            }
+            .navigationDestination(for: Screen.self) { screen in
+                switch screen {
+                case .start:
+                    StartView { destination in path.append(destination) }
+                case .game:
+                    GameScreenView()
+                case .settings:
+                    SettingsView()
+                case .stats:
+                    StatsView()
+                }
+            }
+        }
+    }
 }
