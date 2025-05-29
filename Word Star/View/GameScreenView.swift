@@ -6,40 +6,34 @@
 //
 import SwiftUI
 
+// 📺 Главный игровой экран
 struct GameScreenView: View {
-    let forceNewGame: Bool // 👈 добавили флаг
-    // 🎮 ViewModel теперь инициализируется с флагом `forceNewGame`
-    @StateObject private var viewModel: GameViewModel
-    
-    @State private var showWordList = false     // 📜 Оверлей со списком слов
-    
-    // 🧠 Новый init с параметром, определяющим, грузим ли прогресс
+    let forceNewGame: Bool                             // 🧨 Флаг — начать заново или загрузить прогресс
+    @StateObject private var viewModel: GameViewModel  // 🎮 ViewModel игры
+    @State private var showWordList = false            // 📜 Список слов
+
+    // 🧠 Конструктор с логикой инициализации прогресса или новой игры
     init(forceNewGame: Bool) {
         _viewModel = StateObject(wrappedValue: {
-            let logic = GameLogic()
-            let dictionary = DictionaryManager.shared
-            let generator = LetterSetGenerator(dictionary: dictionary)
-            let vm = GameViewModel(dictionaryManager: dictionary, generator: generator, gameLogic: logic)
-            
-            if !forceNewGame, let saved = GameProgressManager.shared.loadProgress() {
-                print("📦 Загружаем сохранёнку")
-                logic.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
-                vm.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
-                vm.score = saved.score
-                vm.level = saved.level
-                vm.updateWords()
-            } else {
+            let dict = DictionaryManager.shared
+            let generator = LetterSetGenerator(dictionary: dict)
+
+            if forceNewGame || GameProgressManager.shared.loadProgress() == nil {
                 print("🆕 Новая игра")
+                let logic = GameLogic()
+                let vm = GameViewModel(dictionaryManager: dict, generator: generator, gameLogic: logic)
                 vm.startNewGame()
                 GameProgressManager.shared.clearProgress()
+                return vm
+            } else {
+                print("📦 Продолжаем игру из сохранёнки")
+                let (logic, vm) = GameProgressManager.shared.restoreGame(dictionary: dict, generator: generator)!
+                return vm
             }
-
-            return vm
         }())
-        
+
         self.forceNewGame = forceNewGame
     }
-
 
     var body: some View {
         ZStack {
@@ -47,7 +41,7 @@ struct GameScreenView: View {
             BackgroundManager()
                 .ignoresSafeArea()
 
-            // 🎉 Победный алерт
+            // 🎉 Победа
             if viewModel.showWinDialog {
                 VStack {
                     Text("🎉 Победа!")
@@ -80,10 +74,8 @@ struct GameScreenView: View {
             VStack {
                 // 🔝 Верхняя панель
                 HStack {
-                    // 📜 Кнопка списка слов
-                    Button(action: {
-                        showWordList.toggle()
-                    }) {
+                    // 📜 Список слов
+                    Button(action: { showWordList.toggle() }) {
                         Text("📜")
                             .padding()
                             .background(Color.white.opacity(0.4))
@@ -98,6 +90,7 @@ struct GameScreenView: View {
                             .background(Color.white.opacity(0.4))
                             .foregroundColor(.black)
                             .clipShape(Capsule())
+
                         Text("Очки: \(viewModel.score)")
                             .padding(6)
                             .background(Color.white.opacity(0.4))
@@ -107,7 +100,7 @@ struct GameScreenView: View {
 
                     Spacer()
 
-                    // 🔄 Кнопка перезапуска
+                    // 🔄 Перезапуск
                     Button(action: {
                         viewModel.resetGame()
                         BackgroundManagerController.shared.reload()
@@ -122,12 +115,12 @@ struct GameScreenView: View {
 
                 Spacer()
 
-                // ⭐ Игровая звезда
+                // ⭐ Звезда
                 GameBoardView(viewModel: viewModel)
                     .padding(.bottom, 12)
             }
 
-            // 📜 Список слов поверх
+            // 📜 Оверлей со словами
             if showWordList {
                 WordListOverlay(viewModel: viewModel) {
                     showWordList = false

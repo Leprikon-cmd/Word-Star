@@ -8,7 +8,7 @@ import SwiftUI
 
 struct StartView: View {
     
-    @State private var hasSavedGame = GameProgressManager.shared.loadProgress() != nil
+    @State private var hasSavedGame = false // начальное значение
     
     var onNavigate: (Screen) -> Void
     
@@ -44,7 +44,7 @@ struct StartView: View {
                     Button(action: {
                         onNavigate(.game(forceNewGame: true))
                     }) {
-                        Text("Играть")
+                        Text("Новая игра")
                             .font(.title2)
                             .frame(maxWidth: .infinity)
                             .padding()
@@ -81,6 +81,10 @@ struct StartView: View {
                 Spacer() // 👇 Чуть-чуть отступ снизу
             }
             .padding(.bottom, 40)
+        }
+        .onAppear {
+            // 🔁 Проверяем каждый раз, когда экран появляется
+            hasSavedGame = GameProgressManager.shared.loadProgress() != nil
         }
     }
 }

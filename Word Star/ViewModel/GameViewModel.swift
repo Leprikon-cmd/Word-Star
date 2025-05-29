@@ -7,29 +7,31 @@
 import Foundation
 import SwiftUI
 
-// 🎮 Основная модель представления для игры
-// 🧠 ViewModel для игры
+// 🎮 ViewModel — связывает UI и игровую логику
 class GameViewModel: ObservableObject {
 
+    // 📦 Published-свойства, которые следят за изменениями
     @Published var letters: [Character] = []         // текущий набор букв
-    @Published var level: Int = 1
-    @Published var selectedLetters: [Character] = [] // 🔤 Текущий ввод (посимвольно)
-    @Published var result: String = ""               // ✅ Результат последней проверки (строка)
-    @Published var validWords: [String] = []         // 📋 Все допустимые слова для уровня
+    @Published var level: Int = 1                    // текущий уровень
+    @Published var selectedLetters: [Character] = [] // 🔤 Слово в процессе составления
+    @Published var result: String = ""               // ✅ Последний результат
+    @Published var validWords: [String] = []         // 📋 Все допустимые слова
     @Published var foundWords: [String] = []         // 🧠 Найденные игроком слова
-    @Published var score: Int = 0                    // 🧮 Текущий счёт
-    @Published var showWinDialog: Bool = false       // 🏆 Флаг победы
-    @Published var lastResultSymbol: String? = nil   // ✅❌ Символ результата (галка/крестик)
-    @Published var showOverlay: Bool = false         // 🔲 Оверлей — пока не используется
-    private var lastAddedChar: Character? = nil      // 🔐 Защита от повторного тапа по той же букве подряд (если понадобится)
+    @Published var score: Int = 0                    // 🧮 Очки
+    @Published var showWinDialog: Bool = false       // 🏆 Победа
+    @Published var lastResultSymbol: String? = nil   // ✅ или ❌ после ввода
+    @Published var showOverlay: Bool = false         // 🔲 для будущих оверлеев
 
-    // 📦 Генератор и словарь (инициализируются при создании)
+    private var lastAddedChar: Character? = nil      // 🔐 на будущее — защита от повтора буквы
+
+    // 📚 Основные зависимости
     private let dictionaryManager: DictionaryManager
     private let letterSetGenerator: LetterSetGenerator
-    private let progressManager = GameProgressManager.shared // 🎒 менеджер сохранения
-    
+    private let progressManager = GameProgressManager.shared
+
     let gameLogic: GameLogic
 
+    // ⚙️ Конструктор с возможностью принудительно начать новую игру
     init(dictionaryManager: DictionaryManager, generator: LetterSetGenerator, gameLogic: GameLogic, forceNewGame: Bool = false) {
         self.dictionaryManager = dictionaryManager
         self.letterSetGenerator = generator
@@ -40,72 +42,55 @@ class GameViewModel: ObservableObject {
             startNewGame()
         } else if let saved = progressManager.loadProgress() {
             print("📦 Загружаем сохранённую игру")
+
+            // 🎮 Восстанавливаем всё
             self.letters = saved.letters
+            self.validWords = saved.validWords
             self.foundWords = saved.foundWords
             self.score = saved.score
             self.level = saved.level
-            gameLogic.loadState(letters: saved.letters, foundWords: Set(saved.foundWords))
+
+            gameLogic.loadState(
+                letters: saved.letters,
+                validWords: saved.validWords,
+                foundWords: Set(saved.foundWords)
+            )
+
             updateWords()
         } else {
             print("🆕 Прогресса нет — старт новой игры")
             startNewGame()
         }
     }
-    
+
+    // 🔁 Генерация нового уровня
     func startNewGame() {
-        gameLogic.generateNewLevel(from: letterSetGenerator)     // 🎮 Сначала генерим уровень
-        letters = gameLogic.getLetters()                          // ✍️ Сохраняем буквы для отрисовки
-        validWords = gameLogic.getValidWords().sorted(by: {      // 📜 Получаем все слова
-            $0.count == $1.count ? $0 < $1 : $0.count > $1.count
-        })
+        gameLogic.generateNewLevel(from: letterSetGenerator)
+        letters = gameLogic.getLetters()
+        validWords = gameLogic.getValidWords().sorted(by: { $0.count == $1.count ? $0 < $1 : $0.count > $1.count })
         foundWords = []
         score = 0
+        level = 1
         result = ""
         showWinDialog = false
     }
-    
-    func loadState(letters: [Character], foundWords: Set<String>) {
+
+    // 🧠 Загрузка состояния из сохранённого (например, в GameProgressManager.restoreGame)
+    func loadState(letters: [Character], validWords: [String], foundWords: Set<String>) {
         self.letters = letters
+        self.validWords = validWords
         self.foundWords = Array(foundWords)
     }
 
-
-    // 🔁 Сброс уровня и попытка загрузить прогресс
+    // 🔁 Сброс (используется при нажатии «🔄»)
     func resetGame() {
-        // 🧹 Чистим всё, что связано с вводом
-        selectedLetters.removeAll()
-        foundWords.removeAll()
-        score = 0
-        result = ""
-        showWinDialog = false
+        print("🔄 Принудительный сброс — начинаем новую игру")
 
-        // 📦 Пробуем загрузить прогресс
-        if let savedProgress = progressManager.loadProgress() {
-            print("📦 Прогресс найден — загружаем")
+        // 🧹 Чистим прогресс
+        progressManager.clearProgress()
 
-            // ✅ Преобразуем [String] → [Character]
-            let restoredLetters: [Character] = savedProgress.letters.flatMap { $0 }
-
-            // ✅ Преобразуем [String] → Set<String>
-            let restoredFoundWords = Set(savedProgress.foundWords)
-
-            gameLogic.loadState(
-                letters: restoredLetters,
-                foundWords: restoredFoundWords
-            )
-
-            letters = restoredLetters
-            foundWords = Array(restoredFoundWords)
-            score = savedProgress.score
-
-            updateWords()
-        } else {
-            print("🆕 Прогресс не найден — генерим новый уровень")
-
-            gameLogic.generateNewLevel(from: letterSetGenerator)
-            letters = gameLogic.getLetters()
-            updateWords()
-        }
+        // 🆕 Запускаем новую игру
+        startNewGame()
     }
 
     // ✅ Проверка введённого слова
@@ -122,9 +107,12 @@ class GameViewModel: ObservableObject {
             addScore(for: word.count)
             result = "✅ \(word)"
             lastResultSymbol = "✅"
+
+            // 💾 Сохраняем прогресс
             progressManager.saveProgress(
                 letters: letters,
                 foundWords: foundWords,
+                validWords: validWords,
                 score: score,
                 level: level
             )
@@ -141,13 +129,13 @@ class GameViewModel: ObservableObject {
             lastResultSymbol = "❌"
         }
 
-        // ⏳ Через 1.5 сек убрать символ результата
+        // ⏳ Убираем индикатор результата через 1.5 сек
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.lastResultSymbol = nil
         }
     }
 
-    // 📊 Начисление очков
+    // 📊 Подсчёт очков
     private func addScore(for length: Int) {
         let base: Int
         switch length {
@@ -160,34 +148,34 @@ class GameViewModel: ObservableObject {
         score += base
     }
 
-    // 🔄 Обновить список допустимых слов
+    // 🔁 Обновление слов в списке
     func updateWords() {
         validWords = gameLogic.getValidWords().sorted { $0.count > $1.count }
     }
 
-    // ➕ Добавить букву
+    // ➕ Добавление буквы
     func addLetter(_ letter: Character) {
         selectedLetters.append(letter)
     }
 
-    // 🧹 Очистить ввод
+    // 🧹 Очистка ввода
     func clearSelection() {
         selectedLetters.removeAll()
         result = ""
         lastAddedChar = nil
     }
 
-    // ℹ️ Кол-во угаданных слов
+    // ℹ️ Кол-во угаданных
     func getFoundWordCount() -> Int {
         return foundWords.count
     }
 
-    // ℹ️ Общее кол-во слов
+    // ℹ️ Общее допустимых
     func getTotalValidWordCount() -> Int {
         return gameLogic.getValidWords().count
     }
 
-    // 🔤 Текущее составляемое слово
+    // 🧱 Слово в процессе составления
     func getWord() -> String {
         return selectedLetters.map { String($0) }.joined()
     }
