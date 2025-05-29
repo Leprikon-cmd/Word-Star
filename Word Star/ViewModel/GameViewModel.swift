@@ -7,20 +7,30 @@
 import Foundation
 import SwiftUI
 
+// 🎯 Режим после завершения уровня
+enum PostWinMode {
+    case normal        // Обычный режим
+    case explorer      // Режим исследователя (без штрафов)
+    case challenge     // Вызов (с бонусами)
+}
+
 // 🎮 ViewModel — связывает UI и игровую логику
 class GameViewModel: ObservableObject {
 
     // 📦 Published-свойства, которые следят за изменениями
-    @Published var letters: [Character] = []         // текущий набор букв
-    @Published var level: Int = 1                    // текущий уровень
-    @Published var selectedLetters: [Character] = [] // 🔤 Слово в процессе составления
-    @Published var result: String = ""               // ✅ Последний результат
-    @Published var validWords: [String] = []         // 📋 Все допустимые слова
-    @Published var foundWords: [String] = []         // 🧠 Найденные игроком слова
-    @Published var score: Int = 0                    // 🧮 Очки
-    @Published var showWinDialog: Bool = false       // 🏆 Победа
-    @Published var lastResultSymbol: String? = nil   // ✅ или ❌ после ввода
-    @Published var showOverlay: Bool = false         // 🔲 для будущих оверлеев
+    @Published var letters: [Character] = []          // текущий набор букв
+    @Published var level: Int = 1                     // текущий уровень
+    @Published var selectedLetters: [Character] = []  // 🔤 Слово в процессе составления
+    @Published var result: String = ""                // ✅ Последний результат
+    @Published var validWords: [String] = []          // 📋 Все допустимые слова
+    @Published var foundWords: [String] = []          // 🧠 Найденные игроком слова
+    @Published var score: Int = 0                     // 🧮 Очки
+    @Published var showWinDialog: Bool = false        // 🏆 Победа
+    @Published var lastResultSymbol: String? = nil    // ✅ или ❌ после ввода
+    @Published var showOverlay: Bool = false          // 🔲 для будущих оверлеев
+    @Published var isLevelPassed: Bool = false        // ✅ Уровень пройден по упрощённой логике
+    @Published var postWinMode: PostWinMode = .normal // 🔁 Текущий режим
+    @Published var isSurrendered: Bool = false        // ⚑ Игрок сдался
 
     private var lastAddedChar: Character? = nil      // 🔐 на будущее — защита от повтора буквы
 
@@ -73,6 +83,8 @@ class GameViewModel: ObservableObject {
         level = 1
         result = ""
         showWinDialog = false
+        isSurrendered = false // 🔁 сбрасываем флаг "Сдался"
+        postWinMode = .normal // 🧹 Сброс режима на стандартный
     }
 
     // 🧠 Загрузка состояния из сохранённого (например, в GameProgressManager.restoreGame)
@@ -99,14 +111,40 @@ class GameViewModel: ObservableObject {
         tryAddWord(word)
         clearSelection()
     }
+    
+    // ✅ Проверка условий прохождения уровня (в обычном режиме)
+    private func checkLevelCompletion() {
+        // ⚠️ Только в обычном режиме — иначе игнорируем
+        guard postWinMode == .normal else { return }
+
+        let foundSet = Set(foundWords)
+
+        let has5LetterWord = foundSet.contains(where: { $0.count == 5 })
+        let has4LetterWord = foundSet.contains(where: { $0.count == 4 })
+        let atLeast3Others = foundSet.filter { $0.count != 4 && $0.count != 5 }.count >= 3
+
+        if has5LetterWord && has4LetterWord && atLeast3Others {
+            isLevelPassed = true
+            showWinDialog = true
+            print("🎉 Уровень пройден по упрощённой логике!")
+        }
+    }
 
     // ➕ Попытка добавить слово
     func tryAddWord(_ word: String) {
         if gameLogic.isValidWord(word), !foundWords.contains(word) {
             foundWords.append(word)
-            addScore(for: word.count)
-            result = "✅ \(word)"
-            lastResultSymbol = "✅"
+
+            // 🔍 Обработка режима "Исследователь"
+            if postWinMode == .explorer {
+                result = "ℹ️ \(word) (без очков)"
+                lastResultSymbol = "✅"
+            } else {
+                // 🎯 Стандарт или вызов — начисляем очки
+                addScore(for: word.count)
+                result = "✅ \(word)"
+                lastResultSymbol = "✅"
+            }
 
             // 💾 Сохраняем прогресс
             progressManager.saveProgress(
@@ -117,19 +155,29 @@ class GameViewModel: ObservableObject {
                 level: level
             )
 
+            // 🎯 Проверка условий прохождения уровня
+            checkLevelCompletion()
+
+            // 🏆 Полное прохождение уровня
             if foundWords.count == gameLogic.getValidWords().count {
-                showWinDialog = true
-                let bonus = foundWords.count * 5
-                score += bonus
-                result += " 🎁 +\(bonus) бонусных очков!"
+                if postWinMode == .challenge {
+                    let bonus = foundWords.count * 5
+                    score += bonus
+                    result += " 🎁 +\(bonus) бонусных очков!"
+                }
+
+                if postWinMode != .explorer {
+                    showWinDialog = true
+                }
             }
 
         } else {
+            // ❌ Неверное или повторное слово
             result = "❌"
             lastResultSymbol = "❌"
         }
 
-        // ⏳ Убираем индикатор результата через 1.5 сек
+        // ⏳ Через 1.5 секунды убираем символ результата
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             self.lastResultSymbol = nil
         }

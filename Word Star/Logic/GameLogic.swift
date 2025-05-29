@@ -80,4 +80,29 @@ final class GameLogic {
         // ❗ foundWords не используется внутри логики (см. GameViewModel)
         // Поэтому можно игнорировать, либо оставить на будущее.
     }
+    
+    // ✅ Проверка условий прохождения уровня по новым критериям
+    func isLevelCompleted(foundWords: [String]) -> Bool {
+        var hasFive = false
+        var hasFour = false
+        var otherWords = 0
+
+        for word in foundWords {
+            switch word.count {
+            case 5:
+                hasFive = true
+            case 4:
+                hasFour = true
+            case 2...:
+                otherWords += 1
+            default:
+                continue
+            }
+        }
+
+        // отнимаем 2 слова (4 и 5 букв) от общего числа
+        let additionalWords = otherWords - (hasFour ? 1 : 0) - (hasFive ? 1 : 0)
+
+        return hasFive && hasFour && additionalWords >= 3
+    }
 }

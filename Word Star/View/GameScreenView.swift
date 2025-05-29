@@ -41,25 +41,6 @@ struct GameScreenView: View {
             BackgroundManager()
                 .ignoresSafeArea()
 
-            // 🎉 Победа
-            if viewModel.showWinDialog {
-                VStack {
-                    Text("🎉 Победа!")
-                        .font(.title)
-                        .padding()
-                    Text("Вы нашли все слова на этом уровне!")
-                    Button("ОК") {
-                        viewModel.showWinDialog = false
-                    }
-                    .padding(.top)
-                }
-                .frame(maxWidth: 300)
-                .padding()
-                .background(Color.white.opacity(0.9))
-                .cornerRadius(12)
-                .shadow(radius: 10)
-            }
-
             // ✅❌ Символ результата
             if let symbol = viewModel.lastResultSymbol {
                 VStack {
@@ -112,6 +93,24 @@ struct GameScreenView: View {
                     }
                 }
                 .padding(.horizontal)
+                
+                if viewModel.postWinMode != .normal && !viewModel.isSurrendered {
+                    Button("😵 Сдаюсь") {
+                        viewModel.isSurrendered = true
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                }
+                
+                if viewModel.isSurrendered {
+                    Text("Вы сдались. Все слова раскрыты.")
+                        .font(.headline)
+                        .padding(8)
+                        .background(Color.yellow.opacity(0.9))
+                        .cornerRadius(10)
+                }
 
                 Spacer()
 
@@ -125,6 +124,74 @@ struct GameScreenView: View {
                 WordListOverlay(viewModel: viewModel) {
                     showWordList = false
                 }
+            }
+            // 🎉 Победа
+            if viewModel.showWinDialog {
+                VStack {
+                    Text("🎉 Победа!")
+                        .font(.title)
+                        .padding()
+                    Text("Вы прошли уровень!")
+                    Button("ОК") {
+                        viewModel.showWinDialog = false
+                        viewModel.isLevelPassed = true // 👈 после подтверждения — включаем меню режимов
+                    }
+                    .padding(.top)
+                }
+                .frame(maxWidth: 300)
+                .padding()
+                .background(Color.white.opacity(0.9))
+                .cornerRadius(12)
+                .shadow(radius: 10)
+            }
+            
+            // 🎯 Выбор режима после прохождения уровня
+            if viewModel.isLevelPassed && !viewModel.showWinDialog {
+                VStack(spacing: 16) {
+                    Text("🌟 Уровень пройден!")
+                        .font(.title)
+                        .padding(.bottom)
+
+                    Text("Выберите режим для продолжения:")
+                        .font(.headline)
+
+                    Button("🔍 Исследователь (без штрафов)") {
+                        viewModel.postWinMode = .explorer
+                        viewModel.isLevelPassed = false
+                    }
+                    .padding()
+                    .frame(maxWidth: 260)
+                    .background(Color.blue.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+
+                    Button("🎯 Вызов (с бонусами)") {
+                        viewModel.postWinMode = .challenge
+                        viewModel.isLevelPassed = false
+                    }
+                    .padding()
+                    .frame(maxWidth: 260)
+                    .background(Color.orange.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+
+                    Button("🆕 Новая игра") {
+                        viewModel.startNewGame()
+                        BackgroundManagerController.shared.reload()
+                        viewModel.isLevelPassed = false // 👈 сбрасываем
+                    }
+                    .padding()
+                    .frame(maxWidth: 260)
+                    .background(Color.red.opacity(0.8))
+                    .foregroundColor(.white)
+                    .cornerRadius(12)
+                }
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.white.opacity(0.95))
+                .cornerRadius(16)
+                .shadow(radius: 10)
+                .padding(.horizontal)
             }
         }
     }

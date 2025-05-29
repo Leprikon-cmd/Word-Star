@@ -4,8 +4,10 @@
 //
 //  Created by Евгений Зотчик on 28.05.2025.
 //
+
 import SwiftUI
 
+// 📋 Оверлей для отображения списка слов (угаданных и скрытых)
 struct WordListOverlay: View {
     @ObservedObject var viewModel: GameViewModel
     var onClose: () -> Void
@@ -15,9 +17,10 @@ struct WordListOverlay: View {
 
     var body: some View {
         if let selected = selectedWord {
-            DefinitionOverlay(word: selected, onClose: {
+            // 📖 Показываем определение выбранного слова
+            DefinitionOverlay(word: selected) {
                 selectedWord = nil
-            })
+            }
         } else {
             ZStack {
                 Color.black.opacity(0.5)
@@ -27,7 +30,7 @@ struct WordListOverlay: View {
                     Spacer()
 
                     ZStack {
-                        // 🧻 Фон-пергамент (должен быть в Assets как "parchment")
+                        // 🧻 Фон — пергамент
                         backgroundImage?
                             .resizable()
                             .scaledToFill()
@@ -46,28 +49,42 @@ struct WordListOverlay: View {
                                 .padding()
                             }
 
+                            // 🔤 Список слов
                             ScrollView {
                                 VStack(alignment: .leading, spacing: 12) {
                                     ForEach(groupedWords(), id: \.self) { row in
                                         HStack(spacing: 12) {
                                             ForEach(row, id: \.self) { word in
                                                 let isFound = viewModel.foundWords.contains(word)
-                                                let display = isFound ? word : String(repeating: "🔲", count: word.count)
+                                                let shouldReveal = viewModel.isSurrendered || isFound
+                                                let display = shouldReveal ? word : String(repeating: "🔲", count: word.count)
 
                                                 Text(display)
-                                                    .font(.system(size: 24))
+                                                    .font(.system(size: 20))
                                                     .foregroundColor(.black)
+                                                    .padding(6)
+                                                    .background(shouldReveal ? Color.white.opacity(0) : Color.gray.opacity(0))
+                                                    .cornerRadius(6)
                                                     .onTapGesture {
-                                                        if isFound {
+                                                        if shouldReveal {
                                                             selectedWord = word
                                                         }
                                                     }
-                                                    .frame(minWidth:60)
                                             }
                                         }
                                     }
                                 }
-                                .padding(.bottom, 100) // 👈 Вот сюда — увеличь при необходимости
+                                .padding(.bottom, 100)
+                            }
+
+                            // 🟨 Сообщение если игрок сдался
+                            if viewModel.isSurrendered {
+                                Text("Вы сдались. Все слова раскрыты.")
+                                    .font(.headline)
+                                    .padding(10)
+                                    .background(Color.yellow.opacity(0.8))
+                                    .cornerRadius(10)
+                                    .padding(.top, 8)
                             }
                         }
                         .padding()
@@ -82,25 +99,29 @@ struct WordListOverlay: View {
         }
     }
 
-    // 📜 Сортировка: по убыванию длины, затем по алфавиту
+    // 📥 Загрузка фона из ассетов
+    private func loadBackground() {
+        backgroundImage = Image("parchment")
+    }
+
+    // 📚 Сортируем слова: длинные сначала, внутри — по алфавиту
     private func wordSort(_ lhs: String, _ rhs: String) -> Bool {
         if lhs.count != rhs.count {
             return lhs.count > rhs.count
         }
         return lhs < rhs
     }
-    
+
+    // 🧱 Группируем слова в ряды (в зависимости от длины)
     private func groupedWords() -> [[String]] {
         let sorted = viewModel.validWords.sorted(by: wordSort)
         var rows: [[String]] = []
         var currentRow: [String] = []
 
         for word in sorted {
-            let length = word.count
-
             let maxInRow: Int = {
-                if length >= 6 { return 1 }
-                else if length >= 4 { return 2 }
+                if word.count >= 6 { return 1 }
+                else if word.count >= 4 { return 2 }
                 else { return 3 }
             }()
 
@@ -117,10 +138,5 @@ struct WordListOverlay: View {
         }
 
         return rows
-    }
-
-    // 📥 Загрузка фонового изображения из ассетов
-    private func loadBackground() {
-        backgroundImage = Image("parchment") // добавь файл parchment.png в Assets
     }
 }

@@ -73,6 +73,8 @@ struct GameBoardView: View {
                         }
                     }
                     .stroke(Color.yellow, lineWidth: 6)
+                    
+                    
 
                     // 🔤 Буквы в звезде
                     ForEach(starPoints.indices, id: \.self) { index in
@@ -93,6 +95,7 @@ struct GameBoardView: View {
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
+                            guard !viewModel.isSurrendered else { return } // 🚫 Запрет на ввод после сдачи
                             // 👉 Если свайп только начался — очищаем всё
                             if selectedPoints.isEmpty {
                                 viewModel.clearSelection()         // 🧹 сбрасываем текущее слово
