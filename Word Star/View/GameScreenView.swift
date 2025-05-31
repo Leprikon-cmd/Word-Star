@@ -67,12 +67,14 @@ struct GameScreenView: View {
 
                     VStack(spacing: 6) {
                         Text("Найдено: \(viewModel.getFoundWordCount()) из \(viewModel.getTotalValidWordCount())")
+                            .textStyle(size: 18)
                             .padding(6)
                             .background(Color.white.opacity(0.4))
                             .foregroundColor(.black)
                             .clipShape(Capsule())
 
                         Text("Очки: \(viewModel.score)")
+                            .textStyle(size: 18)
                             .padding(6)
                             .background(Color.white.opacity(0.4))
                             .foregroundColor(.black)
@@ -98,6 +100,7 @@ struct GameScreenView: View {
                     Button("😵 Сдаюсь") {
                         viewModel.isSurrendered = true
                     }
+                    .textStyle(size: 18)
                     .padding()
                     .background(Color.gray.opacity(0.8))
                     .foregroundColor(.white)
@@ -106,7 +109,7 @@ struct GameScreenView: View {
                 
                 if viewModel.isSurrendered {
                     Text("Вы сдались. Все слова раскрыты.")
-                        .font(.headline)
+                        .textStyle(size: 18)
                         .padding(8)
                         .background(Color.yellow.opacity(0.9))
                         .cornerRadius(10)
@@ -129,9 +132,10 @@ struct GameScreenView: View {
             if viewModel.showWinDialog {
                 VStack {
                     Text("🎉 Победа!")
-                        .font(.title)
+                        .textStyle(size: 18)
                         .padding()
                     Text("Вы прошли уровень!")
+                        .textStyle(size: 18)
                     Button("ОК") {
                         viewModel.showWinDialog = false
                         viewModel.isLevelPassed = true // 👈 после подтверждения — включаем меню режимов
@@ -149,11 +153,11 @@ struct GameScreenView: View {
             if viewModel.isLevelPassed && !viewModel.showWinDialog {
                 VStack(spacing: 16) {
                     Text("🌟 Уровень пройден!")
-                        .font(.title)
+                        .textStyle(size: 18)
                         .padding(.bottom)
 
                     Text("Выберите режим для продолжения:")
-                        .font(.headline)
+                        .textStyle(size: 18)
 
                     Button("🔍 Исследователь (без штрафов)") {
                         viewModel.postWinMode = .explorer

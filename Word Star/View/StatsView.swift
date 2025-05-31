@@ -2,9 +2,8 @@
 //  StatsView.swift
 //  Word Star
 //
-//  Created by Евгений Зотчик on 28.05.2025.
+//  Created by ChatGPT & Евгений Зотчик on 28.05.2025.
 //
-
 import SwiftUI
 
 struct StatsView: View {

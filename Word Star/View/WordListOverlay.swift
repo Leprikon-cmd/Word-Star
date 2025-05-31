@@ -51,18 +51,18 @@ struct WordListOverlay: View {
 
                             // 🔤 Список слов
                             ScrollView {
-                                VStack(alignment: .leading, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 8) {
                                     ForEach(groupedWords(), id: \.self) { row in
-                                        HStack(spacing: 12) {
+                                        HStack(spacing: 10) {
                                             ForEach(row, id: \.self) { word in
                                                 let isFound = viewModel.foundWords.contains(word)
                                                 let shouldReveal = viewModel.isSurrendered || isFound
                                                 let display = shouldReveal ? word : String(repeating: "🔲", count: word.count)
 
                                                 Text(display)
-                                                    .font(.system(size: 20))
+                                                    .textStyle(size: 30)
                                                     .foregroundColor(.black)
-                                                    .padding(6)
+                                                    .padding(8)
                                                     .background(shouldReveal ? Color.white.opacity(0) : Color.gray.opacity(0))
                                                     .cornerRadius(6)
                                                     .onTapGesture {
@@ -80,7 +80,7 @@ struct WordListOverlay: View {
                             // 🟨 Сообщение если игрок сдался
                             if viewModel.isSurrendered {
                                 Text("Вы сдались. Все слова раскрыты.")
-                                    .font(.headline)
+                                    .textStyle(size: 18)
                                     .padding(10)
                                     .background(Color.yellow.opacity(0.8))
                                     .cornerRadius(10)

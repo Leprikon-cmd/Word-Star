@@ -32,14 +32,14 @@ struct DefinitionOverlay: View {
 
                     // 🔠 Заголовок — само слово
                     Text(word.uppercased())
-                        .font(.title)
+                        .textStyle(size: 30)
                         .bold()
                         .foregroundColor(.black)
 
                     // 📖 Определение
                     ScrollView {
                         Text(DictionaryManager.shared.getDefinition(for: word))
-                            .font(.body)
+                            .textStyle(size: 24)
                             .foregroundColor(.black) // 👈 добавляем явно
                     }
                 }

@@ -60,7 +60,7 @@ struct StartView: View {
                 Spacer() // 🧼 Толкаем всё вниз
                 
                 Text("🌟 Word Star")
-                    .font(.largeTitle)
+                    .textStyle(size: 24)
                     .foregroundColor(.white)
                     .padding(.bottom, 20)
                 
@@ -71,7 +71,7 @@ struct StartView: View {
                             onNavigate(.game(forceNewGame: false))
                         }) {
                             Text("Продолжить")
-                                .font(.title2)
+                                .textStyle(size: 24)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.green.opacity(0.8))
@@ -84,7 +84,7 @@ struct StartView: View {
                         onNavigate(.game(forceNewGame: true))
                     }) {
                         Text("Новая игра")
-                            .font(.title2)
+                            .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white.opacity(0.8))
@@ -96,7 +96,7 @@ struct StartView: View {
                         onNavigate(.settings)
                     }) {
                         Text("Настройки")
-                            .font(.title2)
+                            .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white.opacity(0.8))
@@ -108,7 +108,7 @@ struct StartView: View {
                         onNavigate(.stats)
                     }) {
                         Text("Статистика")
-                            .font(.title2)
+                            .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white.opacity(0.8))
@@ -119,7 +119,7 @@ struct StartView: View {
                         showRulesAlert = true
                     }) {
                         Text("📖 Правила")
-                            .font(.title2)
+                            .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(Color.white.opacity(0.8))

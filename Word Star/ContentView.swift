@@ -19,6 +19,10 @@ struct ContentView: View {
     // 🧭 Управление стеком экранов
     @State private var path: [Screen] = []
 
+    // 👇 Менеджеры шрифтов и настроек
+    @StateObject var fontManager = FontManager.shared
+    @StateObject var settingsManager = SettingsManager.shared
+
     var body: some View {
         NavigationStack(path: $path) {
             StartView { destination in
@@ -29,7 +33,7 @@ struct ContentView: View {
                 case .start:
                     StartView { destination in path.append(destination) }
                 case .game(let forceNewGame):
-                        GameScreenView(forceNewGame: forceNewGame)
+                    GameScreenView(forceNewGame: forceNewGame)
                 case .settings:
                     SettingsView()
                 case .stats:
@@ -37,5 +41,7 @@ struct ContentView: View {
                 }
             }
         }
+        .environmentObject(fontManager)       // ✅ Шрифты
+        .environmentObject(settingsManager)   // ✅ Настройки
     }
 }
