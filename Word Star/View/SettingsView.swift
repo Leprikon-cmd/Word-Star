@@ -100,13 +100,39 @@ struct SettingsView: View {
     }
 
     private var dictionarySelector: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("📚 Словарь — Тут будет выбор словаря —")
+        VStack(alignment: .leading, spacing: 12) {
+            Text("📚 Словари по авторам")
                 .textStyle(size: 18)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.white.opacity(0.5))
+
+            ForEach(["С. И. Ожегов", "А. П. Евгеньева", "В. И. Даль", "нет"], id: \.self) { author in
+                Toggle(authorLabel(author), isOn: Binding(
+                    get: { settings.enabledAuthors.contains(author) },
+                    set: { isOn in
+                        if isOn {
+                            settings.enabledAuthors.insert(author)
+                        } else {
+                            settings.enabledAuthors.remove(author)
+                        }
+                    }
+                ))
+                .textStyle(size: 18)
+                .padding(.horizontal)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.4))
                 .cornerRadius(8)
+            }
+        }
+        .padding()
+        .background(Color.white.opacity(0.5))
+        .cornerRadius(8)
+    }
+    
+    private func authorLabel(_ author: String) -> String {
+        switch author {
+        case "нет":
+            return "🌐 GitHub-словарь без определений"
+        default:
+            return author
         }
     }
 

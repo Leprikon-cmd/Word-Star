@@ -13,12 +13,24 @@ final class SettingsManager: ObservableObject {
     private let defaults = UserDefaults.standard
 
     private init() {
-        // Загружаем начальные значения из UserDefaults
+        // 🔤 Загружаем настройки из UserDefaults
         self.selectedFont = defaults.string(forKey: "selectedFontName") ?? "DefaultFont"
         self.selectedBackground = defaults.string(forKey: "selectedBackground") ?? "default"
         self.isGameModeEnabled = defaults.bool(forKey: "isGameModeEnabled")
         self.isSoundEnabled = defaults.object(forKey: "isSoundEnabled") as? Bool ?? true
         self.selectedDictionary = defaults.string(forKey: "selectedDictionary") ?? "all"
+
+        // 📚 Загружаем включённые авторы
+        if let savedAuthors = defaults.array(forKey: "enabledAuthors") as? [String] {
+            self.enabledAuthors = Set(savedAuthors)
+        } else {
+            self.enabledAuthors = [
+                "С. И. Ожегов",
+                "А. П. Евгеньева",
+                "В. И. Даль",
+                "нет"
+            ]
+        }
     }
 
     // 🔤 Выбранный шрифт
@@ -49,19 +61,33 @@ final class SettingsManager: ObservableObject {
         }
     }
 
-    // 📚 Выбранный словарь (дал, ожегов, евгеньева, all)
+    // ✅ Автор(ы) включённые для показа словарей
+    @Published var enabledAuthors: Set<String> {
+        didSet {
+            let arrayToSave = Array(enabledAuthors)
+            defaults.set(arrayToSave, forKey: "enabledAuthors")
+        }
+    }
+
+    // 📚 Выбранный словарь (сейчас не используется, но пусть останется)
     @Published var selectedDictionary: String {
         didSet {
             defaults.set(selectedDictionary, forKey: "selectedDictionary")
         }
     }
 
-    // 🧼 Сброс всех настроек (на крайний случай)
+    // 🧼 Сброс всех настроек
     func resetAll() {
         selectedFont = "DefaultFont"
         selectedBackground = "default"
         isGameModeEnabled = false
         isSoundEnabled = true
         selectedDictionary = "all"
+        enabledAuthors = [
+            "С. И. Ожегов",
+            "А. П. Евгеньева",
+            "В. И. Даль",
+            "нет"
+        ]
     }
 }
