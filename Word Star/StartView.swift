@@ -74,8 +74,12 @@ struct StartView: View {
                                 .textStyle(size: 24)
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(Color.green.opacity(0.8))
-                                .cornerRadius(12)
+                                .background(
+                                    Image("parchment")
+                                        .resizable()
+                                        .scaledToFill()
+                                )
+                                .clipShape(RoundedRectangle(cornerRadius: 16))
                         }
                     }
 
@@ -87,8 +91,12 @@ struct StartView: View {
                             .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(12)
+                            .background(
+                                Image("parchment")
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
                     // 🔧 Кнопка Настройки
@@ -99,8 +107,12 @@ struct StartView: View {
                             .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(12)
+                            .background(
+                                Image("parchment")
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     
                     // 📊 Кнопка Статистика
@@ -111,8 +123,12 @@ struct StartView: View {
                             .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(12)
+                            .background(
+                                Image("parchment")
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     // 📖 Кнопка Правила игры
                     Button(action: {
@@ -122,8 +138,12 @@ struct StartView: View {
                             .textStyle(size: 24)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(12)
+                            .background(
+                                Image("parchment")
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                     }
                     .alert(isPresented: $showRulesAlert) {
                         Alert(

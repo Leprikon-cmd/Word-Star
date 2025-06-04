@@ -8,7 +8,7 @@ import Foundation
 import SwiftUI
 
 // 🎯 Режим после завершения уровня
-enum PostWinMode {
+enum PostWinMode: String, Codable, CaseIterable, Hashable {
     case normal        // Обычный режим
     case explorer      // Режим исследователя (без штрафов)
     case challenge     // Вызов (с бонусами)
@@ -119,14 +119,21 @@ class GameViewModel: ObservableObject {
 
         let foundSet = Set(foundWords)
 
-        let has5LetterWord = foundSet.contains(where: { $0.count == 5 })
-        let has4LetterWord = foundSet.contains(where: { $0.count == 4 })
-        let atLeast3Others = foundSet.filter { $0.count != 4 && $0.count != 5 }.count >= 3
+        let has5LetterWord = foundSet.contains(where: { $0.count >= 5 })
+        let has4LetterWord = foundSet.contains(where: { $0.count >= 4 })
+        let atLeast3WordsOfLength2OrMore = foundSet.filter { $0.count >= 2 }.count >= 5
 
-        if has5LetterWord && has4LetterWord && atLeast3Others {
+        if has5LetterWord && has4LetterWord && atLeast3WordsOfLength2OrMore {
             isLevelPassed = true
             showWinDialog = true
             print("🎉 Уровень пройден по упрощённой логике!")
+
+            // 📊 Фиксируем победу в статистике
+            StatsManager.shared.registerGame(
+                level: String(level),
+                mode: PostWinMode.normal,
+                won: true
+            )
         }
     }
 
@@ -144,6 +151,9 @@ class GameViewModel: ObservableObject {
                 addScore(for: word.count)
                 result = "✅ \(word)"
                 lastResultSymbol = "✅"
+
+                // 🧠 Регистрируем угаданное слово в статистике
+                StatsManager.shared.registerFound(word: word)
             }
 
             // 💾 Сохраняем прогресс

@@ -13,6 +13,7 @@ enum Screen: Hashable {
     case game(forceNewGame: Bool)
     case settings
     case stats
+    case foundWords
 }
 
 struct ContentView: View {
@@ -22,6 +23,7 @@ struct ContentView: View {
     // 👇 Менеджеры шрифтов и настроек
     @StateObject var fontManager = FontManager.shared
     @StateObject var settingsManager = SettingsManager.shared
+    @StateObject var statsManager = StatsManager.shared
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -38,10 +40,16 @@ struct ContentView: View {
                     SettingsView()
                 case .stats:
                     StatsView()
+                        .environmentObject(statsManager)
+                case .foundWords:
+                    FoundWordsView()
+                case .stats:
+                    StatsView { destination in path.append(destination) }
                 }
             }
         }
         .environmentObject(fontManager)       // ✅ Шрифты
         .environmentObject(settingsManager)   // ✅ Настройки
+        .environmentObject(statsManager)      // ✅ Статистика
     }
 }

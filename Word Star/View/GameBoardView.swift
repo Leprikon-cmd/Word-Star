@@ -36,7 +36,12 @@ struct GameBoardView: View {
                 .textStyle(size: 35)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 8)
-                .background(Color.white.opacity(0.3))
+                .background(
+                    Image("parchment")
+                        .resizable()
+                        .scaledToFill()
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 16))
                 .foregroundColor(.black)
                 .clipShape(Capsule())
 
@@ -97,7 +102,12 @@ struct GameBoardView: View {
                         Text(String(letter))
                             .textStyle(size: 40)
                             .frame(width: letterCircleSize, height: letterCircleSize)
-                            .background(isSelected ? Color.yellow.opacity(0.7) : Color.white.opacity(0.6))
+                            .background(
+                                Image("parchment")
+                                    .resizable()
+                                    .scaledToFill()
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 16))
                             .foregroundColor(.black)
                             .clipShape(Circle())
                             .position(point)

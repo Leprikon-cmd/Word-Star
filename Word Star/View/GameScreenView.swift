@@ -55,16 +55,18 @@ struct GameScreenView: View {
             VStack {
                 // 🔝 Верхняя панель
                 HStack {
-                    // 📜 Список слов
+                    // 📜 Список слов — кастомная кнопка с картинкой
                     Button(action: { showWordList.toggle() }) {
-                        Text("📜")
-                            .padding()
-                            .background(Color.white.opacity(0.4))
-                            .clipShape(Circle())
+                        Image("parchment_bg2")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 44, height: 44) // 🎯 Не вылезает
+                            .shadow(radius: 2)
                     }
-
+                    .buttonStyle(PlainButtonStyle()) // Убираем анимации и выделение
+                    
                     Spacer()
-
+                    
                     VStack(spacing: 6) {
                         Text("Найдено: \(viewModel.getFoundWordCount()) из \(viewModel.getTotalValidWordCount())")
                             .textStyle(size: 18)
@@ -72,7 +74,7 @@ struct GameScreenView: View {
                             .background(Color.white.opacity(0.4))
                             .foregroundColor(.black)
                             .clipShape(Capsule())
-
+                        
                         Text("Очки: \(viewModel.score)")
                             .textStyle(size: 18)
                             .padding(6)
@@ -80,19 +82,21 @@ struct GameScreenView: View {
                             .foregroundColor(.black)
                             .clipShape(Capsule())
                     }
-
+                    
                     Spacer()
-
+                    
                     // 🔄 Перезапуск
                     Button(action: {
                         viewModel.resetGame()
                         BackgroundManagerController.shared.reload()
                     }) {
-                        Text("🔄")
-                            .padding()
-                            .background(Color.white.opacity(0.4))
-                            .clipShape(Circle())
+                        Image("restart")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 50, height: 50) // 🎯 Стандартный безопасный размер
+                            .shadow(radius: 2)
                     }
+                    .buttonStyle(PlainButtonStyle()) // Без системных эффектов
                 }
                 .padding(.horizontal)
                 
